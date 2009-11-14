@@ -1,13 +1,14 @@
 (function($) {
 	$.scanvas = {
-		_init: function(canvas) {
-			return $.extend($.canvas._init(canvas), {
+		_init: function(canvas, dim) {
+			return $.extend($.canvas._init(canvas, dim), {
 				selectables: [],
 				non_selectables: [],
 				currently_selecting: [],
 				currently_selected: [],
 				start_coords: {x: 0, y: 0},
 				selecting: false,
+				add_selecting: false,
 
 				_addSelectable: function(selectable) {
 					this.selectables.push(selectable);
@@ -24,7 +25,12 @@
 				_mousedown: function(e) {
 					if (!this.selecting) {
 						this.selecting = true;
-						this.currently_selected = [];
+						if (e.shiftKey) {
+							this.add_selecting = true;
+						}
+						else {
+							this.currently_selected = [];
+						}
 						this.start_coords = this._findCoords(e);
 					}
 				},
@@ -43,14 +49,24 @@
 
 				_mouseup: function(e) {
 					if (this.selecting) {
-						this.selecting = false;
 						this.currently_selecting = [];
 						for (var i = 0; i < this.selectables.length; i++) {
 							var fcoords = this._findCoords(e);
 							if (this.selectables[i].doesRectIntersect({x1: this.start_coords.x, y1: this.start_coords.y, x2: fcoords.x, y2: fcoords.y})) {
-								this.currently_selected.push(this.selectables[i]);
+								var found = false;
+								for (var j = 0; j < this.currently_selected.length; j++) {
+									if (this.selectables[i] === this.currently_selected[j]) {
+										found = true;
+										break;
+									}
+								}
+								if (!found) {
+									this.currently_selected.push(this.selectables[i]);
+								}
 							}
 						}
+						this.add_selecting = false;
+						this.selecting = false;
 					}
 				},
 
@@ -71,7 +87,7 @@
 						for (var j = 0; j < this.currently_selecting.length; j++) {
 							if (selectable === this.currently_selecting[j]) {
 								this.context.save();
-								selectable.renderSelecting(this.context);
+								selectable.render(this.context, "selecting");
 								this.context.restore();
 								found = true;
 								break;
@@ -84,14 +100,14 @@
 					for (var j = 0; j < this.currently_selected.length; j++) {
 						if (selectable === this.currently_selected[j]) {
 							this.context.save();
-							selectable.renderSelected(this.context);
+							selectable.render(this.context, "selected");
 							this.context.restore();
 							found = true;
 							break;
 						}
 					}
 					if (!found) {
-						selectable.renderNormal(this.context);
+						selectable.render(this.context, "normal");
 					}
 				},
 
@@ -122,9 +138,8 @@
 			var options = $.extend(defaults, options);
 
 			return this.each(function() {
-				var o = options;
-				var obj = $(this);
-				var canvas = $.scanvas._init(obj);
+				var o = $.extend({mousearea: $(this), dim: {x: 0, y: 0, width: $(this).attr('width'), height: $(this).attr('height')}}, options);
+				var canvas = $.scanvas._init($(this), o.dim);
 				for (var i = 0; i < o.selectable_items.length; i++) {
 					canvas._addSelectable(o.selectable_items[i]);
 				}
@@ -133,17 +148,17 @@
 				}
 				canvas._render();
 
-				obj.mousedown(function(e) {
+				o.mousearea.mousedown(function(e) {
 					canvas._mousedown(e);
 					canvas._render(canvas._findCoords(e), o);
 				});
 
-				obj.mousemove(function(e) {
+				o.mousearea.mousemove(function(e) {
 					canvas._mousemove(e);
 					canvas._render(canvas._findCoords(e), o);
 				});
 
-				obj.mouseup(function(e) {
+				o.mousearea.mouseup(function(e) {
 					canvas._mouseup(e);
 					canvas._render(canvas._findCoords(e), o);
 				});

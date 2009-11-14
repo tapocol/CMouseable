@@ -1,101 +1,70 @@
-function Block(startx, starty, width, height) {
+function CMouseableRect(startx, starty, width, height) {
 	this.x = startx;
 	this.y = starty;
 	this.width = width;
 	this.height = height;
+	this.render_types = { normal: "rgb(128, 128, 128)", selecting: "rgb(192, 192, 192)", selected: "rgb(64, 64, 64)", dragging: "rgba(128, 128, 128, 0.7)" };
 }
-Block.prototype.getX = function() {
+CMouseableRect.diffPoint = function(point, rect_point, rect_size) {
+	if (point < rect_point) {
+		return point - rect_point;
+	}
+	else if (point > rect_point + rect_size) {
+		return point - (rect_point + rect_size);
+	}
+	return 0;
+}
+CMouseableRect.prototype.getX = function() {
 	return this.x;
 }
-Block.prototype.getY = function() {
+CMouseableRect.prototype.getY = function() {
 	return this.y;
 }
-Block.prototype.getWidth = function() {
+CMouseableRect.prototype.getWidth = function() {
 	return this.width;
 }
-Block.prototype.getHeight = function() {
+CMouseableRect.prototype.getHeight = function() {
 	return this.height;
 }
-Block.prototype.adjustCoords = function(dcoords) {
+CMouseableRect.prototype.adjustCoords = function(dcoords) {
 	this.x += dcoords.x;
 	this.y += dcoords.y;
 }
-Block.prototype.areCoordsIn = function(coords) {
+CMouseableRect.prototype.areCoordsIn = function(coords) {
 	return (coords.x >= this.x && coords.x < this.x + this.width && coords.y >= this.y && coords.y < this.y + this.height);
 }
-Block.prototype.doesRectIntersect = function(coords) {
-	var dx1, dy1, dx2, dy2;
-	if (coords.x1 < this.x) {
-		dx1 = coords.x1 - this.x;
-	}
-	else if (coords.x1 > this.x + this.width) {
-		dx1 = coords.x1 - (this.x + this.width);
-	}
-	else {
-		dx1 = 0;
-	}
-	if (coords.y1 < this.y) {
-		dy1 = coords.y1 - this.y;
-	}
-	else if (coords.y1 > this.y + this.height) {
-		dy1 = coords.y1 - (this.y + this.height);
-	}
-	else {
-		dy1 = 0;
-	}
-	if (coords.x2 < this.x) {
-		dx2 = coords.x2 - this.x;
-	}
-	else if (coords.x2 > this.x + this.width) {
-		dx2 = coords.x2 - (this.x + this.width);
-	}
-	else {
-		dx2 = 0;
-	}
-	if (coords.y2 < this.y) {
-		dy2 = coords.y2 - this.y;
-	}
-	else if (coords.y2 > this.y + this.height) {
-		dy2 = coords.y2 - (this.y + this.height);
-	}
-	else {
-		dy2 = 0;
-	}
+CMouseableRect.prototype.doesRectIntersect = function(coords) {
+	var dx1 = CMouseableRect.diffPoint(coords.x1, this.x, this.width);
+	var dy1 = CMouseableRect.diffPoint(coords.y1, this.y, this.height);
+	var dx2 = CMouseableRect.diffPoint(coords.x2, this.x, this.width);
+	var dy2 = CMouseableRect.diffPoint(coords.y2, this.y, this.height);
 	return (
-		((dx1 == 0 || dx2 == 0) && (dy1 == 0 || dy2 == 0)) ||
-		((dx1 == 0 || dx2 == 0) && (dy1 * dy2 < 0)) ||
-		((dy1 == 0 || dy2 == 0) && (dx1 * dx2 < 0)) ||
-		((dx1 * dx2 < 0) && (dy1 * dy2 < 0))
+		(dx1 == 0 || dx2 == 0 || dx1 * dx2 < 0) &&
+		(dy1 == 0 || dy2 == 0 || dy1 * dy2 < 0)
 	);
 }
-Block.prototype.render = function(context) {
-	context.fillRect(this.x, this.y, this.width, this.height);
-}
-Block.prototype.renderOffset = function(context, dcoords) {
+CMouseableRect.prototype.render = function(context, type, dcoords) {
+	var style = eval("this.render_types." + type);
+	if (style !== undefined) {
+		context.fillStyle = style;
+	}
+	dcoords = $.extend({x: 0, y: 0}, dcoords);
 	context.fillRect(this.x + dcoords.x, this.y + dcoords.y, this.width, this.height);
 }
-Block.prototype.renderNormal = function(context, opacity) {
-	context.fillStyle = 'rgb(128, 128, 128)';
-	this.render(context);
-}
-Block.prototype.renderSelecting = function(context) {
-	context.fillStyle = 'rgb(192, 192, 192)';
-	this.render(context);
-}
-Block.prototype.renderSelected = function(context) {
-	context.fillStyle = 'rgb(64, 64, 64)';
-	this.render(context);
-}
-Block.prototype.renderDragging = function(context, dcoords) {
-	context.fillStyle = 'rgb(64, 64, 64, 0.7)';
-	this.renderOffset(context, dcoords);
-}
 $(function() {
+	var context = $("#canvas").get(0).getContext('2d');
+	context.save();
+	context.fillStyle = "rgb(240, 240, 240)";
+	context.fillRect(0, 0, $("#canvas").attr('width'), $("#canvas").attr('height'));
+	context.restore();
+
 	$("#canvas").cdraggable({
 		draggable_items: [
-			new Block(0, 0, 50, 50),
-			new Block(100, 100, 50, 50)
-		]
+			new CMouseableRect(20, 0, 50, 50),
+			new CMouseableRect(120, 100, 50, 50)
+		],
+		mousearea: $(window),
+		dim: {x: 0, y: 0, width: 400, height: 400}
 	});
 });
 

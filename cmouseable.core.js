@@ -1,15 +1,12 @@
 (function($) {
 	$.canvas = {
-		_init: function (canvas) {
+		_init: function (canvas, dim) {
 			return {
 				canvas: canvas,
 				context: canvas.get(0).getContext('2d'),
 				width: canvas.attr('width'),
 				height: canvas.attr('height'),
-				min_x: 0,
-				min_y: 0,
-				max_x: canvas.attr('width'),
-				max_y: canvas.attr('height'),
+				dim: dim,
 
 				_findCoords: function(e) {
 					return this._correctCoords({x: e.pageX, y: e.pageY});
@@ -20,7 +17,7 @@
 				},
 
 				_renderClear: function() {
-					this.context.clearRect(0, 0, this.width, this.height);
+					this.context.clearRect(dim.x, dim.y, dim.width, dim.height);
 				}
 			};
 		}
