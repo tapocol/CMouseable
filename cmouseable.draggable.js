@@ -59,7 +59,7 @@
 					return dcoords;
 				},
 
-				_mousedown: function(e) {
+				_mousedown: function(e, o) {
 					if (!this.dragging) {
 						if (!e.shiftKey) {
 							var coords = this._findCoords(e);
@@ -76,17 +76,17 @@
 								return;
 							}
 						}
-						this.scanvas._mousedown(e);
+						this.scanvas._mousedown(e, o);
 					}
 				},
 
-				_mousemove: function(e) {
+				_mousemove: function(e, o) {
 					if (!this.dragging) {
-						this.scanvas._mousemove(e);
+						this.scanvas._mousemove(e, o);
 					}
 				},
 
-				_mouseup: function(e) {
+				_mouseup: function(e, o) {
 					if (this.dragging) {
 						var coords = this._findCoords(e);
 						for (var i = 0; i < this.currently_dragging.length; i++) {
@@ -96,7 +96,7 @@
 						this.dragging = false;
 					}
 					else {
-						this.scanvas._mouseup(e);
+						this.scanvas._mouseup(e, o);
 					}
 				},
 
@@ -141,12 +141,15 @@
 			var defaults = {
 				draggable_items: [],
 				non_draggable_items: [],
+				minimum_rect: 5,
 				selecting_box_fillStyle: "rgba(128, 192, 255, 0.7)",
 				selecting_box_strokeStyle: "rgba(64, 128, 192, 0.7)"
 			}
-			var options = $.extend(defaults, options);
 
-			return this.each(function() {
+			var options = $.extend(defaults, options);
+			var canvases = [];
+
+			this.each(function() {
 				var o = $.extend({mousearea: $(this), dim: {x: 0, y: 0, width: $(this).attr('width'), height: $(this).attr('height')}}, options);
 				var canvas = $.dcanvas._init($(this), o.dim);
 				for (var i = 0; i < o.draggable_items.length; i++) {
@@ -158,20 +161,24 @@
 				canvas._render();
 
 				o.mousearea.mousedown(function(e) {
-					canvas._mousedown(e);
+					canvas._mousedown(e, o);
 					canvas._render(canvas._findCoords(e), o);
 				});
 
 				o.mousearea.mousemove(function(e) {
-					canvas._mousemove(e);
+					canvas._mousemove(e, o);
 					canvas._render(canvas._findCoords(e), o);
 				});
 
 				o.mousearea.mouseup(function(e) {
-					canvas._mouseup(e);
+					canvas._mouseup(e, o);
 					canvas._render(canvas._findCoords(e), o);
 				});
+
+				canvases.push(canvas);
 			});
+
+			return canvases;
 		}
 	});
 })(jQuery);

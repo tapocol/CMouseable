@@ -58,7 +58,7 @@ $(function() {
 	context.fillRect(0, 0, $("#canvas").attr('width'), $("#canvas").attr('height'));
 	context.restore();
 
-	$("#canvas").cdraggable({
+	window.canvas = $("#canvas").cdraggable({
 		draggable_items: [
 			new CMouseableRect(20, 0, 50, 50),
 			new CMouseableRect(120, 100, 50, 50)

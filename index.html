@@ -14,7 +14,35 @@
 
 <body>
 
-<canvas id="canvas" width="640" height="400" style="border: 1px solid #000;">Your browser does not support the canvas tag.</canvas>
+	<div>
+		<canvas id="canvas" width="640" height="400" style="border: 1px solid #000;">Your browser does not support the canvas tag.</canvas>
+	</div>
+	<div>
+		<p>The demo's purpose is to showcase the capabilities of the CMouseable plugin for jQuery. CMouseable integrates mouse actions with the HTML canvas tag with just a few lines needed to start and tons of customizable options.</p>
+		<p>Right now, you can click to select a box or drag rectangles to select multiple boxes. Once you have selected at least one box, click and hold down inside a selected box to begin dragging the selected box(es). You can use the shift key to add to your selection, as well.</p>
+		<p>Some of the customizations are:</p>
+		<ul>
+			<li>Set the draggable area within the canvas area.</li>
+			<li>Extend CMouseableRect to modify colors, modify shapes, modify anything with the object.</li>
+			<li>The area that accepts the mouse inputs (canvas, body, window, etc).</li>
+		</ul>
+		<p>Future plans:</p>
+		<ul>
+			<li>Ability to interface with the CMouseable plugin. <button onclick="window.canvas[0]._addDraggable(new CMouseableRect(200, 200, 50, 50));window.canvas[0]._render();">Add Block</button></li>
+			<li>Ability to use Ctrl, Alt and Shift keys to adjust your mouse commands.</li>
+		</ul>
+		<h3>The 4 Rendering States of CMouseable</h3>
+		<dl>
+			<dt>Normal State - Medium Grey</dt>
+			<dd>Nothing in happening to the box.</dd>
+			<dt>Selecting State - Light Grey</dt>
+			<dd>Click in an open area and drag over the box to see the selecting state. This tells you that the box will be selected if you use this selection area.</dd>
+			<dt>Selected State - Dark Grey</dt>
+			<dd>Follow the selecting state instructions above. Then, let go of the mouse button to see the selected boxes in the selected state.</dd>
+			<dt>Dragging State - Medium Grey with Transparency</dt>
+			<dd>Once you have at least one box selected. Click inside one of the selected boxes to beginning dragging. You cannot move the boxes out of bounds.</dd>
+		</dl>
+	</div>
 
 </body>
 </html>
